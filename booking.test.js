@@ -2,7 +2,7 @@ const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict');
 const path=require('node:path');
 const {chromium}=require('playwright');
-const {railwayBookingOptions}=require('./extension/booking');
+const {railwayBookingOptions,railwayCoachName}=require('./extension/booking');
 let browser;
 before(async()=>{browser=await chromium.launch({headless:true});});
 after(async()=>{await browser?.close();});
@@ -12,7 +12,7 @@ const url='https://eticket.railway.gov.bd/booking/train/search?fromcity=Dhaka&to
 const fixture=`<!doctype html><html><head><style>app-single-trip,app-seat-layout{display:block}</style></head><body>
 <app-single-trip><div class="trip-name"><div class="trip-left-info">PANCHAGARH EXPRESS (793)</div></div>
 <div class="single-seat-class"><span class="seat-class-name">SNIGDHA</span><button class="book-now-btn">BOOK NOW</button></div>
-<app-seat-layout style="display:none"><select id="select-bogie"><option value="0">KA (3)</option><option value="1">KHA (3)</option></select>
+<app-seat-layout style="display:none"><select id="select-bogie"><option value="0">KA - 3 Seat(s)</option><option value="1">KHA - 3 Seat(s)</option></select>
 <div id="seats"></div><select id="boardingpoint"><option value="dhaka">Dhaka</option></select><div id="confirmbooking"><button class="continue-btn">Continue</button></div></app-seat-layout>
 </app-single-trip><button id="pay">Pay</button>
 <script>
@@ -58,4 +58,19 @@ test('existing manual selection is preserved and prevents additional reservation
 });
 test('when OTP is skipped by the site, stops at passenger details without payment',async()=>{
  const p=await page(fixture.replace("f.id='confirm-ticket-otp-form'","f.id='psngr'"));try{const r=await run(p);assert.equal(r.state,'manual');assert.equal(await p.evaluate(()=>paid),0);}finally{await p.close()}
+});
+test('coach label parser strips counts while preserving coach identity',()=>{
+ for(const name of ['KA - 12 Seat(s)',' ka – ১২ seats ','KA (12)','KA (12 Seats)'])assert.equal(railwayCoachName(name),'KA');
+ assert.equal(railwayCoachName('KA-1 - 20 Seat(s)'),'KA-1');
+ assert.equal(railwayCoachName('KA (AC) - 4 Seat(s)'),'KA (AC)');
+ assert.equal(railwayCoachName('ক - ১২ Seat(s)'),'ক');
+});
+test('accepts pasted coach label when available count changes',async()=>{
+ const p=await page();try{const r=await run(p,{...options,mode:'selected',coach:'KHA - 22 Seat(s)',seats:'KHA-1, KHA-2'});assert.deepEqual(r.seats,['KHA-1','KHA-2']);}finally{await p.close()}
+});
+test('unknown coach lists valid names without reserving seats',async()=>{
+ const p=await page();try{await assert.rejects(run(p,{...options,coach:'GA'}),/উপলব্ধ কোচ: KA, KHA/);assert.deepEqual(await p.evaluate(()=>clicked),[]);}finally{await p.close()}
+});
+test('ambiguous coach labels do not fall back to a different coach',async()=>{
+ const p=await page(fixture.replace('KHA - 3 Seat(s)','KA - 5 Seat(s)'));try{await assert.rejects(run(p,{...options,coach:'KA'}),/একাধিক কোচ/);assert.deepEqual(await p.evaluate(()=>clicked),[]);}finally{await p.close()}
 });

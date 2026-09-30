@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Railway Ticket Assistant",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Fill Bangladesh Railway journey details in your current tab. Independent, unofficial assistant.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": { "default_popup": "popup.html", "default_title": "Railway Ticket Assistant" }

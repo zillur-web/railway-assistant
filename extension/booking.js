@@ -10,6 +10,12 @@ function railwayBookingOptions(data) {
   return {quantity, train, mode:data.mode, coach, seats};
 }
 
+function railwayCoachName(label) {
+  return String(label || '').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').trim().replace(/\s+/g,' ').toUpperCase()
+    .replace(/\s*[-–—]\s*[0-9০-৯]+\s+SEAT(?:\(S\)|S)?\s*$/i,'')
+    .replace(/\s*\(\s*[0-9০-৯]+(?:\s+SEAT(?:\(S\)|S)?)?\s*\)\s*$/i,'').trim();
+}
+
 async function railwayBook(journey, rawOptions, job = {}) {
   const options = railwayBookingOptions(rawOptions);
   const report = job.report || (()=>{});
@@ -76,10 +82,11 @@ async function railwayBook(journey, rawOptions, job = {}) {
   if(selected().length || layout.querySelector('#tbl_seat_list .seat-info-row'))throw new Error('আগে থেকেই সিট নির্বাচন করা আছে। সেগুলো দেখে নিজে Continue করুন অথবা বাতিল করে আবার চালান।');
   const coach=layout.querySelector('#select-bogie');
   if(!coach)throw new Error('কোচের তালিকা পাওয়া যায়নি।');
-  let coaches=[...coach.options].filter(o=>!o.disabled&&o.textContent.trim()&&o.value!=='');
+  let coaches=await wait(()=>{const choices=[...coach.options].filter(o=>!o.disabled&&o.textContent.trim()&&o.value!=='');return choices.length&&choices;},'কোচের তালিকা এখনও লোড হয়নি। সাইটের সিট ম্যাপ দেখে আবার চেষ্টা করুন।');
   if(options.coach) {
-    coaches=coaches.filter(o=>norm(o.textContent)===norm(options.coach)||norm(o.textContent).replace(/\s*\([^)]*\)\s*$/,'').trim()===norm(options.coach));
-    if(coaches.length!==1)throw new Error('কোচের নাম হুবহু মেলেনি। সাইটের কোচের নাম দিন।');
+    const choices=coaches;
+    coaches=choices.filter(o=>railwayCoachName(o.textContent)===railwayCoachName(options.coach));
+    if(coaches.length!==1)throw new Error((coaches.length?'একাধিক কোচের নাম মিলে গেছে। সাইটে নিজে কোচ নির্বাচন করুন।':'কোচের নাম মেলেনি।')+' উপলব্ধ কোচ: '+choices.map(o=>railwayCoachName(o.textContent)).join(', '));
   }
   const available = () => all('.btn-seat.seat-available',layout).filter(b=>!b.disabled&&!b.matches('.seat-selected,.seat-disabled,.seat-booked,.seat-in-progress,.request_pending'));
   let targets=null;
@@ -131,4 +138,4 @@ function railwayStart(journey, options) {
   Promise.resolve().then(()=>railwayBook(journey,options,{report,cancelled:()=>job.stopped})).then(result=>report(result.message,result.state)).catch(error=>report(error.message,'stopped')).finally(()=>{job.running=false;stop.disabled=false;stop.textContent='বন্ধ করুন';stop.onclick=()=>host.remove();});
   return {started:true};
 }
-if(typeof module!=='undefined')module.exports={railwayBookingOptions,railwayBook};
+if(typeof module!=='undefined')module.exports={railwayBookingOptions,railwayBook,railwayCoachName};
