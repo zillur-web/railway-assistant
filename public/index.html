@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Railway Ticket Assistant</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#17221b}
+    .wrap{max-width:720px;margin:50px auto;padding:20px}.card{background:#fff;padding:30px;border-radius:18px;box-shadow:0 12px 40px #00000012}
+    h1{margin:0 0 8px;font-size:28px}.sub{color:#66736b;margin-bottom:26px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{margin-bottom:16px}
+    label{display:block;font-weight:700;margin-bottom:7px}input,select{width:100%;padding:13px;border:1px solid #ccd5cf;border-radius:10px;font-size:15px}
+    button{width:100%;border:0;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;background:#176b3a;color:#fff}
+    button:disabled{opacity:.6}.note{margin-top:18px;padding:13px;background:#f7faf8;border-radius:10px;font-size:13px;line-height:1.5}
+    #status{margin-top:15px;font-weight:700}.ok{color:#176b3a}.err{color:#b42318}
+    @media(max-width:600px){.grid{grid-template-columns:1fr}.wrap{margin:15px auto}.card{padding:20px}}
+  </style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <h1>Railway Ticket Assistant</h1>
+  <div class="sub">Windows / Laragon PC</div>
+  <div class="grid">
+    <div class="field"><label>From</label><input id="from" placeholder="e.g. Dhaka"></div>
+    <div class="field"><label>To</label><input id="to" placeholder="e.g. Chattogram"></div>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Journey Date</label><input id="date" type="date"></div>
+    <div class="field"><label>Class</label>
+      <select id="seatClass"><option value="">Select class</option><option>SHOVAN</option><option>S_CHAIR</option><option>SNIGDHA</option><option>AC_S</option><option>AC_B</option></select>
+    </div>
+  </div>
+  <button id="start">Start Assistant</button>
+  <div id="status"></div>
+  <div class="note">This helper opens the official Bangladesh Railway e-ticket site and attempts basic form filling. CAPTCHA/security verification and final purchase/payment remain manual. It does not bypass anti-bot or security controls.</div>
+</div></div>
+<script>
+const btn=document.getElementById('start'), status=document.getElementById('status');
+btn.onclick=async()=>{
+  btn.disabled=true; status.className=''; status.textContent='Opening browser...';
+  try{
+    const r=await fetch('/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      from:document.getElementById('from').value.trim(),to:document.getElementById('to').value.trim(),
+      date:document.getElementById('date').value,seatClass:document.getElementById('seatClass').value
+    })});
+    const d=await r.json(); status.className=d.ok?'ok':'err'; status.textContent=d.message;
+  }catch(e){status.className='err';status.textContent=e.message}
+  btn.disabled=false;
+};
+</script>
+</body></html>

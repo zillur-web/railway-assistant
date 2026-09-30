@@ -1,0 +1,14 @@
+{
+  "name": "railway-ticket-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test extension.test.js booking.test.js",
+    "install-browser": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.55.0"
+  }
+}

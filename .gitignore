@@ -1,0 +1,9 @@
+node_modules/
+.research/
+.env
+.env.*
+!.env.example
+*.log
+railway-chrome-extension.zip
+test-results/
+playwright-report/

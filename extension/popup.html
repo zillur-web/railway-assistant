@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Railway Ticket Assistant</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><span class="badge">সহজ যাত্রা · v1.1.1</span><h1>Railway Assistant</h1><p>আপনার যাত্রা, আপনার নিয়ন্ত্রণে।</p></header>
+  <main><form id="journey">
+    <label for="from">কোথা থেকে <small>From</small></label><input id="from" required maxlength="40" placeholder="Dhaka" autocomplete="off">
+    <button type="button" id="swap" class="swap" aria-label="স্টেশন অদলবদল">⇅ স্টেশন বদলান</button>
+    <label for="to">কোথায় যাবেন <small>To</small></label><input id="to" required maxlength="40" placeholder="Chattogram" autocomplete="off">
+    <div class="grid"><div><label for="date">যাত্রার তারিখ</label><input id="date" type="date" required></div><div><label for="seatClass">সিট ক্লাস</label><select id="seatClass" required><option value="S_CHAIR">S_CHAIR</option><option>SHOVAN</option><option>SNIGDHA</option><option>AC_S</option><option>AC_B</option><option>F_BERTH</option><option>F_SEAT</option><option>F_CHAIR</option><option>SHULOV</option><option>AC_CHAIR</option></select></div></div>
+    <details open><summary>ট্রেন ও সিট নির্বাচন</summary>
+      <label for="train">ট্রেনের নাম / নম্বর</label><input id="train" maxlength="100" placeholder="PANCHAGARH EXPRESS অথবা 793">
+      <div class="grid"><div><label for="quantity">কতটি সিট</label><select id="quantity"><option>1</option><option>2</option><option>3</option><option>4</option></select></div><div><label for="mode">নির্বাচন</label><select id="mode"><option value="random">Random খালি সিট</option><option value="selected">নির্দিষ্ট সিট</option></select></div></div>
+      <label for="coach">কোচের নাম <small id="coachHint">খালি = যেকোনো কোচ</small></label><input id="coach" placeholder="সাইটে দেখানো কোচের নাম">
+      <div id="seatFields" hidden><label for="seats">সিটের পুরো নম্বর</label><input id="seats" placeholder="KA-1, KA-2"><small>সাইটের সিট নম্বর হুবহু লিখুন, কমা দিয়ে আলাদা করুন।</small></div>
+    </details>
+    <button id="fill" type="submit">সিট বেছে OTP পর্যন্ত এগোন →</button>
+    <button id="fillOnly" class="secondary" type="button">শুধু যাত্রার ফর্ম পূরণ</button>
+  </form>
+  <p id="status" role="status" aria-live="polite">রেলওয়ের Home পেজ খুলে এই বাটন চাপুন।</p>
+  <button id="open" class="secondary" type="button">রেলওয়ের ওয়েবসাইট খুলুন ↗</button>
+  <footer>প্রথম বাটনে সিট সাময়িকভাবে সংরক্ষিত হতে পারে এবং সাইট থেকে OTP আসতে পারে। লগইন/CAPTCHA এলে নিজে করুন। OTP ও পেমেন্ট নিজে সম্পন্ন করবেন। Random সিট পাশাপাশি হওয়ার নিশ্চয়তা নেই। এটি রেলওয়ের অফিসিয়াল extension নয়।</footer>
+  </main><script src="assistant.js"></script><script src="booking.js"></script><script src="popup.js"></script>
+</body></html>
